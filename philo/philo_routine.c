@@ -6,7 +6,7 @@
 /*   By: skuhlcke <skuhlcke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/23 16:48:27 by skuhlcke          #+#    #+#             */
-/*   Updated: 2025/06/25 15:47:15 by skuhlcke         ###   ########.fr       */
+/*   Updated: 2025/06/25 17:52:49 by skuhlcke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,15 @@
 void	smart_sleep(long duration, t_config *config)
 {
 	long	start;
+	long	now;
 
 	start = timestamp_ms();
 	while (!simulation_ended(config))
 	{
-		if (timestamp_ms() - start >= duration)
+		now = timestamp_ms();
+		if (now - start >= duration)
 			break ;
-		usleep(50);
+		usleep(100);
 	}
 }
 
@@ -60,28 +62,23 @@ long	timestamp_ms(void)
 
 void	*philo_routine(void *arg)
 {
-	t_philo	*philo;
+	t_philo		*philo;
+	t_config	*cfg;
+	int			left;
+	int			right;
 
-	philo = (t_philo *)arg;
-	pthread_mutex_lock(&philo->meal_mutex);
-	philo->lm_stamp = timestamp_ms();
-	pthread_mutex_unlock(&philo->meal_mutex);
-	if (check_1(philo))
-		return (NULL);
-	if (philo->idx % 2 == 0)
-		usleep(200);
-	while (!simulation_ended(philo->infoptr))
+	philo = arg;
+	cfg = philo->infoptr;
+	left = philo->idx;
+	right = (left + 1) % cfg->number_of_philosophers;
+	if (cfg->number_of_philosophers == 1)
 	{
-		take_forks(philo);
-		if (simulation_ended(philo->infoptr))
-			break ;
-		eat(philo);
-		if (simulation_ended(philo->infoptr))
-			break ;
-		sleep_and_think(philo);
-		if (simulation_ended(philo->infoptr))
-			break ;
-		usleep(100);
+		handle_single_philo(philo);
+		return (NULL);
 	}
+	if ((left % 2) == 0)
+		usleep(cfg->time_to_eat * 1000);
+	while (!simulation_ended(cfg))
+		do_cycle(philo, left, right);
 	return (NULL);
 }

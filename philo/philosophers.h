@@ -6,7 +6,7 @@
 /*   By: skuhlcke <skuhlcke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 13:11:29 by justlaw           #+#    #+#             */
-/*   Updated: 2025/06/25 15:43:41 by skuhlcke         ###   ########.fr       */
+/*   Updated: 2025/06/25 17:51:10 by skuhlcke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,12 @@ typedef struct s_philo
 	pthread_mutex_t	meal_mutex;
 }		t_philo;
 
+typedef struct s_fork
+{
+	pthread_mutex_t	mutex;
+	int				is_taken;
+}		t_fork;
+
 //Init
 void	init(t_config *config, char *av[]);
 int		mutex_init(t_config *config);
@@ -65,9 +71,12 @@ void	sleep_and_think(t_philo *philo);
 int		check_1(t_philo *philo);
 
 //Helpers utils
-void	take_forks_even(t_philo *philo, int left, int right);
-void	take_forks_odd(t_philo *philo, int left, int right);
 void	update_meals(t_philo *philo);
+void	handle_single_philo(t_philo *philo);
+void	do_cycle(t_philo *philo, int left, int right);
+
+// int		try_take_one_fork(t_fork *fork, t_philo *philo);
+// void 	release_fork(t_fork *fork);
 
 //Monitor Routine
 void	*monitor_routine(void *arg);
